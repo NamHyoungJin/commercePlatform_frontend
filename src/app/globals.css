@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+/**
+ * 라이트 스튜디오 — 따뜻한 종이 톤 배경 + 틸 포인트 (레이아웃 토큰만, 그리드·폭 규칙은 컴포넌트와 동일)
+ */
+:root {
+  --background: #faf8f5;
+  --foreground: #1c1b19;
+
+  --surface: #ffffff;
+  --surface-muted: #f3efe8;
+  --surface-elevated: #ffffff;
+
+  --border-subtle: rgba(28, 27, 25, 0.08);
+  --border-strong: rgba(28, 27, 25, 0.16);
+
+  --text-primary: #1c1b19;
+  --text-secondary: #45423c;
+  --text-muted: #78736a;
+
+  --accent-teal: #0f766e;
+  --accent-teal-hover: #0d9488;
+  --accent-amber: #c2410c;
+  --accent-amber-soft: #ea580c;
+
+  --pill-bg: #ebe6de;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-accent-teal: var(--accent-teal);
+  --color-accent-teal-hover: var(--accent-teal-hover);
+  --color-accent-amber: var(--accent-amber);
+  --color-accent-amber-soft: var(--accent-amber-soft);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --max-width-pc: 1440px;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-secondary);
+  font-family: var(--font-sans), 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), 'Apple SD Gothic Neo', 'Malgun Gothic', Georgia, serif;
+}
+
+.pc-section-head {
+  font-family: var(--font-display), 'Apple SD Gothic Neo', 'Malgun Gothic', Georgia, serif;
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.home-album-strip-title {
+  font-family: var(--font-sans), 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  font-size: clamp(1.375rem, 2.2vw, 1.85rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.home-album-strip-sub {
+  font-family: var(--font-sans), 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* 홈 «인기 악보 차트» — 메인 컬럼( max-w-pc )에 맞춘 제목·부제 스케일 */
+.popular-chart-section-title {
+  font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+}
+
+.popular-chart-section-sub {
+  font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* 영상·사진 히어로 위 — 동일 타이포 클래스를 밝은 색으로 (레이아웃·클래스명 변경 없음) */
+.hero-media-on-dark .home-album-strip-title,
+.hero-media-on-dark .popular-chart-section-title {
+  color: #ffffff;
+}
+.hero-media-on-dark .home-album-strip-sub,
+.hero-media-on-dark .popular-chart-section-sub {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+a:hover {
+  color: inherit;
+}
+
+/* 이용약관·개인정보취급방침 HTML (`LegalDocumentBody`) — 구획·줄간격·목록 */
+.legal-doc {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.legal-doc dl {
+  margin: 0;
+}
+
+.legal-doc dt {
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.legal-doc dt:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.legal-doc dd {
+  margin: 0 0 1.75rem;
+  padding-left: 0.25rem;
+  color: var(--text-secondary);
+}
+
+.legal-doc dd:last-child {
+  margin-bottom: 0;
+}
+
+.legal-doc ul {
+  margin: 0.5rem 0 0.75rem;
+  padding-left: 1.35rem;
+  list-style-position: outside;
+  list-style-type: disc;
+}
+
+.legal-doc ul ul {
+  margin-top: 0.35rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1.2rem;
+}
+
+.legal-doc li {
+  margin-bottom: 0.55em;
+  line-height: 1.75;
+}
+
+.legal-doc li:last-child {
+  margin-bottom: 0;
+}
+
+/* 약관 조항 소제목 (예: 제 1 조 목적) */
+.legal-doc p {
+  margin: 1.15rem 0 0.65rem;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.legal-doc dd > p:first-child {
+  margin-top: 0;
+}
+
+.legal-doc a {
+  color: var(--accent-teal-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.legal-doc a:hover {
+  color: var(--accent-teal);
+}
+
+/* 앨범 페이지 소개 패널 — 라이트 스크롤바 */
+.album-intro-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #c4bfb6 var(--surface-muted);
+}
+.album-intro-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.album-intro-scroll::-webkit-scrollbar-track {
+  background: var(--surface-muted);
+  border-radius: 6px;
+}
+.album-intro-scroll::-webkit-scrollbar-thumb {
+  background: #c4bfb6;
+  border-radius: 6px;
+}
+.album-intro-scroll::-webkit-scrollbar-thumb:hover {
+  background: #a8a299;
+}
+
+/* 토스 결제창(PC): SDK가 dimmer에 height:100% + iframe을 top/50%로 두어 일부 레이아웃에서 세로 중앙이 어긋남 → 뷰포트(dvh) 기준 flex 정렬 */
+#__tosspayments_payment_widget_window_dimmer__ {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  padding: max(0px, env(safe-area-inset-top)) max(0px, env(safe-area-inset-right))
+    max(0px, env(safe-area-inset-bottom)) max(0px, env(safe-area-inset-left)) !important;
+}
+
+/* 카드 등 고정 크기(650×700) 모달 iframe — 전체 화면(jK) iframe과 구분 */
+#__tosspayments_payment_widget_window_dimmer__ > iframe[name='__tosspayments_payment_widget_window_iframe__'][style*='650px'] {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  margin-left: 0 !important;
+  margin-top: 0 !important;
+  transform: none !important;
+  max-width: calc(100vw - 24px) !important;
+  max-height: calc(100dvh - 24px) !important;
+}
