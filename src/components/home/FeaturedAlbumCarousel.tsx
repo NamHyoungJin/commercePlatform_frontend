@@ -2,7 +2,7 @@
 
 import useEmblaCarousel from 'embla-carousel-react';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { useCallback, useEffect, useState } from 'react';
 
 interface Album {

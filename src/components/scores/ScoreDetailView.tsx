@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { scoresApi, Score, type FilterOption } from '@/lib/scoresApi';
 import HeroSearchPill from '@/components/layout/HeroSearchPill';
 import AddToCartButton from '@/components/cart/AddToCartButton';

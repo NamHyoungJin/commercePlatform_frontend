@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { Score } from '@/lib/scoresApi';
 
 interface Props {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import { cartApi } from '@/lib/cartApi';

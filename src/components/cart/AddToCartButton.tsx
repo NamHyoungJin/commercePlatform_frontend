@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { usePathname } from 'next/navigation';
 import axios from 'axios';
 import CartAddedModal from '@/components/cart/CartAddedModal';

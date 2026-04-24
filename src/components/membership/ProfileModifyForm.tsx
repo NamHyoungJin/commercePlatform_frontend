@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { authApi } from '@/lib/authApi';
 import { useAuthStore } from '@/store/authStore';
 import axios from 'axios';

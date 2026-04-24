@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import Image from 'next/image';
 import { Score } from '@/lib/scoresApi';
 import AddToCartButton from '@/components/cart/AddToCartButton';
@@ -35,18 +35,18 @@ export default function ScoreSongRow({ score, size = 'default', trackLead = null
     : 'w-[6.75rem] min-w-[6.75rem] max-w-[6.75rem]';
 
   const rowLayout = trackLead
-    ? /* 앨범 트랙: 트랙 간 구분을 위해 하단선 유지(last 제거 — 단일 악보 트랙에서 선이 사라지던 문제) */
-      `flex flex-row flex-wrap items-start justify-between gap-x-3 gap-y-4 border-b border-[var(--border-subtle)] first:pt-0 ${lg ? 'py-5 md:py-6' : 'py-4 sm:py-5'}`
+    ? /* 앨범 트랙: 모바일=제목 1줄·버튼 1줄(썸네일 없음), sm+=기존 가로 */
+      `flex max-sm:flex-col max-sm:items-stretch max-sm:gap-3 flex-row flex-wrap items-start justify-between gap-x-3 gap-y-4 border-b border-[var(--border-subtle)] first:pt-0 ${lg ? 'py-5 md:py-6' : 'py-4 sm:py-5'}`
     : `flex flex-col border-b border-[var(--border-subtle)] first:pt-0 last:border-b-0 sm:flex-row sm:items-center sm:gap-x-2 md:gap-x-3 ${lg ? 'gap-3 py-5 md:py-6' : 'gap-3 py-4'}`;
 
   return (
     <div className={rowLayout}>
       <div
-        className={`flex min-w-0 flex-1 ${trackLead ? 'items-start' : 'items-center'} ${lg ? 'gap-3' : trackLead ? 'gap-3 sm:gap-4' : 'gap-2 sm:gap-2.5'}`}
+        className={`flex min-w-0 flex-1 max-sm:w-full ${trackLead ? 'max-sm:flex-row max-sm:flex-wrap max-sm:items-start max-sm:gap-2 sm:items-start' : 'items-center'} ${lg ? 'gap-3' : trackLead ? 'gap-3 sm:gap-4' : 'gap-2 sm:gap-2.5'}`}
       >
         {trackLead ? (
           <div
-            className={`shrink-0 border-r border-[var(--border-subtle)] pr-3 sm:pr-4 ${lg ? 'w-48' : 'w-[7.5rem] sm:w-36 md:w-40'}`}
+            className={`shrink-0 border-r border-[var(--border-subtle)] pr-3 max-sm:max-w-[40%] max-sm:border-b-0 sm:pr-4 ${lg ? 'w-48' : 'w-[7.5rem] sm:w-36 md:w-40'}`}
           >
             <p className="text-[11px] font-extrabold uppercase leading-tight tracking-wide text-accent-teal sm:text-sm md:text-[15px]">
               CD {trackLead.cd_number} · Track {trackLead.track_number}
@@ -67,7 +67,7 @@ export default function ScoreSongRow({ score, size = 'default', trackLead = null
           href={detail}
           className={`relative shrink-0 overflow-hidden rounded-md border border-solid border-[color:var(--border-strong)] bg-[#fff] ${
             trackLead
-              ? 'block w-fit max-w-[min(100%,200px)]'
+              ? 'hidden w-fit max-w-[min(100%,200px)] sm:block'
               : lg
                 ? 'aspect-[4/3] w-[calc(6.75rem+30px)] shrink-0 sm:w-[calc(7.5rem+30px)]'
                 : 'aspect-[4/3] w-[calc(3rem+30px)] shrink-0'
@@ -107,7 +107,7 @@ export default function ScoreSongRow({ score, size = 'default', trackLead = null
             </span>
           )}
         </Link>
-        <div className={`min-w-0 flex-1 ${lg ? 'pt-1' : 'pt-0.5'}`}>
+        <div className={`min-w-0 flex-1 max-sm:min-w-0 ${lg ? 'pt-1' : 'pt-0.5'}`}>
           <Link href={detail} className="block group">
             <h4
               className={`line-clamp-2 font-semibold leading-snug text-text-primary transition-colors group-hover:text-accent-teal-hover ${
@@ -135,25 +135,29 @@ export default function ScoreSongRow({ score, size = 'default', trackLead = null
    
       </div>
       <div
-        className={`flex min-w-0 shrink-0 flex-col items-center gap-2 self-stretch sm:ml-auto sm:self-center ${
+        className={`flex min-w-0 shrink-0 flex-col items-center gap-2 self-stretch max-sm:items-end sm:ml-auto sm:self-center ${
           trackLead
             ? lg
               ? 'min-w-[min(100%,220px)] w-full min-[480px]:w-auto sm:min-w-[240px]'
-              : 'min-w-[min(100%,200px)] w-full pl-0 sm:w-auto'
+              : 'max-sm:w-full max-sm:min-w-0 min-w-[min(100%,200px)] w-full pl-0 sm:w-auto sm:items-center'
             : lg
-              ? 'w-full pl-[calc(6.75rem+30px+1rem)] sm:w-auto sm:min-w-0 sm:max-w-[8.25rem] sm:pl-0'
-              : 'w-full pl-[calc(3rem+30px+0.5rem)] sm:w-auto sm:min-w-0 sm:max-w-[6.75rem] sm:pl-0'
+              ? 'w-full pl-[calc(6.75rem+30px+1rem)] sm:w-auto sm:min-w-0 sm:max-w-[8.25rem] sm:pl-0 sm:items-center'
+              : 'w-full pl-[calc(3rem+30px+0.5rem)] sm:w-auto sm:min-w-0 sm:max-w-[6.75rem] sm:pl-0 sm:items-center'
         }`}
       >
-        <div className={`flex shrink-0 flex-col items-stretch gap-2 ${catalogActionColW}`}>
+        <div
+          className={`flex shrink-0 flex-col items-stretch gap-2 sm:gap-2 ${catalogActionColW} max-sm:w-full max-sm:min-w-0 max-sm:max-w-none max-sm:flex-row max-sm:flex-nowrap max-sm:items-center max-sm:justify-end max-sm:gap-x-2 max-sm:gap-y-0`}
+        >
           <ScoreListPricePill
             amount={Number(score.price)}
             href={detail}
             size={lg ? 'large' : 'default'}
             layout="default"
-            className="w-full min-w-0"
+            className="w-full min-w-0 shrink-0 max-sm:w-auto max-sm:min-w-0"
           />
-          <div className="flex w-full flex-row flex-wrap items-center justify-center gap-x-1.5 gap-y-1">
+          <div
+            className={`flex w-full shrink-0 flex-row flex-wrap items-center justify-center gap-x-1.5 gap-y-1 max-sm:w-auto max-sm:flex-nowrap max-sm:justify-end sm:w-full`}
+          >
           <SampleScoreModalTrigger
             sampleImageUrl={score.thumbnail_url}
             title={score.title}

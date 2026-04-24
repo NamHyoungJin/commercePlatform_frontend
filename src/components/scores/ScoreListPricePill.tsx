@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 
 /**
  * `ScoreSongRow` 액션 열: `gridCellFixed` 등에서 한 칸 가로 ≈ 7.25rem

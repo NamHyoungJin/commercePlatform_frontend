@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { scoresApi, VideoScoreItem } from '@/lib/scoresApi';
 import { useBelowLg } from '@/hooks/useBelowLg';
 import HomeSectionTitle from '@/components/home/HomeSectionTitle';

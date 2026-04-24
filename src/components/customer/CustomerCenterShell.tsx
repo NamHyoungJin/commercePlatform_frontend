@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import type { ReactNode } from 'react';
 
 /** 히어로(어두운 오버레이) 위 가로 탭 */

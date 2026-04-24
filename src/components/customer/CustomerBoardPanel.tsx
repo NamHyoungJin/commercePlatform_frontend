@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type {
   CustomerBoardDetail,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import axios from 'axios';
 import { cartApi, type CartLine } from '@/lib/cartApi';
 import { formatApiErrorMessage } from '@/lib/onlyonemusicApi';

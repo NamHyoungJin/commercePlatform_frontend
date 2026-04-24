@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { isAxiosError } from 'axios';
 import { useAuthStore } from '@/store/authStore';

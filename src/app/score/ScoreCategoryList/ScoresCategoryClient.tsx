@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ScoreSongRow from '@/components/scores/ScoreSongRow';
 import ScoreFilter from '@/components/scores/ScoreFilter';

@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import Image from 'next/image';
 import type { AlbumBrowseItem } from '@/components/home/AlbumBrowseTopCharts';
 import { useBelowLg } from '@/hooks/useBelowLg';

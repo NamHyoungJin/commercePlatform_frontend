@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState, type ReactNode, type SVGProps } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { useSearchParams } from 'next/navigation';
 import HeroSearchPill from '@/components/layout/HeroSearchPill';
 import ScoreSongRow from '@/components/scores/ScoreSongRow';
 import { scoresApi, type AlbumScoresBundle } from '@/lib/scoresApi';
 
-const metaIconClass = 'mt-0.5 h-4 w-4 shrink-0 text-orange-400/90';
+const metaIconClass = 'mt-0.5 h-4 w-4 shrink-0 text-accent-teal';
 
 /** 앨범 페이지 제목용 — 겹친 앨범 커버 실루엣 */
 function AlbumStackIcon({ className, ...rest }: SVGProps<SVGSVGElement>) {
@@ -32,10 +32,11 @@ function AlbumStackIcon({ className, ...rest }: SVGProps<SVGSVGElement>) {
 
 function MetaLine({ icon, label, value }: { icon: ReactNode; label: string; value: ReactNode }) {
   return (
-    <div className="flex gap-2.5 items-start">
-      <span className="inline-flex shrink-0 text-orange-400/90 [&_svg]:h-4 [&_svg]:w-4">{icon}</span>
-      <p className="min-w-0 flex-1 leading-snug text-neutral-300">
-        <strong className="text-neutral-100">{label}</strong> {value}
+    <div className="flex items-start gap-3">
+      <span className="inline-flex shrink-0 text-accent-teal [&_svg]:h-4 [&_svg]:w-4">{icon}</span>
+      <p className="min-w-0 flex-1 text-[15px] leading-snug md:text-base">
+        <span className="font-medium text-neutral-600">{label}</span>{' '}
+        <span className="font-medium text-neutral-900">{value}</span>
       </p>
     </div>
   );
@@ -83,7 +84,7 @@ function AlbumScoresHero({
         className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/40 via-black/25 to-black/55"
         aria-hidden
       />
-      <div className="relative z-10 mx-auto flex max-w-pc flex-col items-center px-4 py-7 sm:px-6 md:py-9">
+      <div className="hero-media-on-dark relative z-10 mx-auto flex max-w-pc flex-col items-center px-4 py-7 sm:px-6 md:py-9">
         {showCaption ? (
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="home-album-strip-title popular-chart-section-title">{title}</h1>
@@ -190,27 +191,28 @@ export default function AlbumScoresClient() {
       <AlbumScoresHero title={album.name} subtitle={heroSubtitle} imageUrl={album.thumbnail_url} />
 
       <div className="mx-auto max-w-pc px-4 py-10 md:py-14">
-        <div className="rounded-2xl border border-neutral-800 bg-[var(--surface)] p-6 md:p-10">
-          <header className="mb-8 border-b border-neutral-800 pb-6 md:mb-10 md:pb-8">
+        <div className="rounded-2xl border border-[var(--border-strong)] bg-[var(--surface)] p-6 md:p-10">
+          <header className="mb-8 border-b border-[var(--border-subtle)] pb-6 md:mb-10 md:pb-8">
             <div className="flex items-start gap-3 md:items-center md:gap-4">
               <AlbumStackIcon className="mt-0.5 h-8 w-8 shrink-0 text-orange-500 md:mt-0 md:h-9 md:w-9" />
               <div className="min-w-0 flex-1">
-                <h2 className="text-2xl font-bold leading-[1.2] tracking-tight text-white text-balance md:text-3xl lg:text-[2rem]">
+                <h2 className="text-2xl font-bold leading-[1.2] tracking-tight text-text-primary text-balance md:text-3xl lg:text-[2rem]">
                   {album.name || '—'}
                 </h2>
                 {heroSubtitle ? (
-                  <p className="mt-2 text-sm leading-snug text-neutral-400 md:text-base">{heroSubtitle}</p>
+                  <p className="mt-2 text-sm leading-snug text-text-secondary md:text-base">{heroSubtitle}</p>
                 ) : null}
               </div>
             </div>
           </header>
 
-          <div className="flex flex-col gap-8 sm:[--album-sq:24.75rem] lg:[--album-sq:27rem] lg:grid lg:min-h-0 lg:grid-cols-2 lg:items-start lg:gap-10">
-            {/* 1단: 앨범 이미지(정사각) + 메타 — sm~ 에서 세로 = 이미지 한 변과 동일 */}
-            <div className="grid w-full flex-1 grid-cols-1 items-start gap-6 sm:grid-cols-[auto_1fr] sm:gap-8">
-              <div className="mx-auto w-[min(100%,24.75rem)] shrink-0 sm:mx-0 sm:w-[var(--album-sq)] lg:w-[var(--album-sq)]">
+          {/* lg: 메타 폭을 줄여 소개(1fr) 가로를 ~4/3 배 가깝게 확보 (이전 대비 메타 max 28rem → 18rem) */}
+          <div className="flex flex-col gap-8 [--album-sq:min(22.5rem,calc(100vw-2rem))] sm:[--album-sq:24.75rem] lg:[--album-sq:27rem] lg:grid lg:min-h-0 lg:grid-cols-[var(--album-sq)_minmax(16rem,18rem)_minmax(0,1fr)] lg:items-stretch lg:gap-x-4 xl:gap-x-6">
+            {/* sm~md: 커버 | 메타(세로=앨범 한 변). lg+: 동일 높이 3열 — 소개는 남은 가로 전부 */}
+            <div className="grid w-full grid-cols-1 items-stretch gap-6 sm:grid-cols-[var(--album-sq)_minmax(0,1fr)] sm:gap-8 lg:contents">
+              <div className="mx-auto h-[var(--album-sq)] w-[var(--album-sq)] max-w-full shrink-0 sm:mx-0">
                 {album.thumbnail_url ? (
-                  <div className="relative aspect-square w-full overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900">
+                  <div className="relative h-full w-full overflow-hidden rounded-lg border border-[var(--border-strong)] bg-surface-muted">
                     <Image
                       src={album.thumbnail_url}
                       alt=""
@@ -221,14 +223,14 @@ export default function AlbumScoresClient() {
                     />
                   </div>
                 ) : (
-                  <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-neutral-700 bg-neutral-900 text-5xl text-neutral-600 lg:text-6xl">
+                  <div className="flex h-full w-full items-center justify-center rounded-lg border border-[var(--border-strong)] bg-surface-muted text-5xl text-text-muted lg:text-6xl">
                     ♪
                   </div>
                 )}
               </div>
 
-              <div className="min-w-0 rounded-xl border border-neutral-800/80 bg-neutral-950/40 px-4 py-4 sm:box-border sm:flex sm:h-[var(--album-sq)] sm:min-h-0 sm:max-h-[var(--album-sq)] sm:flex-col sm:overflow-hidden sm:px-5 sm:py-4">
-                <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto text-sm text-neutral-300 sm:pr-1 md:text-[15px]">
+              <div className="flex min-h-0 h-[var(--album-sq)] w-full min-w-0 flex-col overflow-hidden rounded-xl border border-stone-200 bg-white px-4 py-4 sm:px-6 sm:py-5 lg:px-3.5 lg:py-4">
+                <div className="flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto pr-1">
                   <MetaLine
                     label="앨범구분 :"
                     value={album.gubn_name || '—'}
@@ -326,17 +328,17 @@ export default function AlbumScoresClient() {
               </div>
             </div>
 
-            {/* 2단: 앨범 소개 */}
-            <div className="min-w-0 w-full lg:flex-1">
-              <section aria-label="앨범 소개">
+            {/* 앨범 소개 — 모바일 숨김, sm+ 노출 / lg+: 세로=앨범 한 변 */}
+            <div className="hidden min-h-0 min-w-0 w-full sm:block sm:h-[var(--album-sq)] lg:flex lg:h-[var(--album-sq)]">
+              <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col" aria-label="앨범 소개">
                 {album.intro ? (
-                  <div className="album-intro-scroll max-h-[250px] overflow-y-auto overscroll-contain rounded-lg border border-neutral-800 bg-neutral-950/60 px-4 py-3 [scrollbar-gutter:stable] sm:box-border sm:max-h-none sm:h-[var(--album-sq)] sm:px-4 sm:py-3">
-                    <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-neutral-300 md:text-[15px]">
+                  <div className="album-intro-scroll h-full min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border border-stone-200 bg-white px-5 py-4 [scrollbar-gutter:stable] sm:py-5">
+                    <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-neutral-800 md:text-base">
                       {album.intro}
                     </p>
                   </div>
                 ) : (
-                  <p className="rounded-lg border border-neutral-800 bg-neutral-950/40 px-4 py-6 text-sm text-neutral-600 max-sm:py-6 sm:flex sm:h-[var(--album-sq)] sm:items-center sm:justify-center sm:py-4">
+                  <p className="flex h-full min-h-0 flex-1 items-center justify-center rounded-xl border border-stone-200 bg-white px-5 py-6 text-sm text-neutral-500">
                     등록된 앨범 소개가 없습니다.
                   </p>
                 )}
@@ -344,7 +346,7 @@ export default function AlbumScoresClient() {
             </div>
           </div>
 
-          <hr className="my-10 border-neutral-800" />
+          <hr className="my-10 border-[var(--border-subtle)]" />
 
           <div className="space-y-10">
             {tracks.length === 0 ? (
@@ -360,20 +362,20 @@ export default function AlbumScoresClient() {
                 return (
                   <div key={t.track_sid} className="space-y-0">
                     {t.scores.length === 0 ? (
-                      <div className="flex flex-row flex-wrap items-start justify-between gap-x-3 gap-y-4 border-b border-white/[0.14] py-4 sm:py-5">
+                      <div className="flex flex-row flex-wrap items-start justify-between gap-x-3 gap-y-4 border-b border-[var(--border-subtle)] py-4 sm:py-5">
                         <div className="flex min-w-0 flex-1 items-start gap-3 sm:gap-4">
-                          <div className="w-[7.5rem] shrink-0 border-r border-neutral-800 pr-3 sm:w-36 sm:pr-4 md:w-40">
-                            <p className="text-[11px] font-extrabold uppercase leading-tight tracking-wide text-teal-200 sm:text-sm md:text-[15px]">
+                          <div className="w-[7.5rem] shrink-0 border-r border-[var(--border-subtle)] pr-3 sm:w-36 sm:pr-4 md:w-40">
+                            <p className="text-[11px] font-extrabold uppercase leading-tight tracking-wide text-accent-teal sm:text-sm md:text-[15px]">
                               CD {t.cd_number} · Track {t.track_number}
                             </p>
-                            <p className="mt-0.5 line-clamp-2 text-[11px] font-semibold leading-snug text-white sm:text-[13px]">
+                            <p className="mt-0.5 line-clamp-2 text-[11px] font-semibold leading-snug text-text-primary sm:text-[13px]">
                               {t.title || '—'}
                             </p>
                             {t.artist ? (
-                              <p className="mt-0.5 truncate text-[10px] text-neutral-400 sm:text-xs">{t.artist}</p>
+                              <p className="mt-0.5 truncate text-[10px] text-text-muted sm:text-xs">{t.artist}</p>
                             ) : null}
                           </div>
-                          <p className="min-w-0 flex-1 pt-0.5 text-sm text-neutral-500 sm:max-w-md">
+                          <p className="min-w-0 flex-1 pt-0.5 text-sm text-text-muted sm:max-w-md">
                             연결된 악보가 없습니다.
                           </p>
                         </div>
