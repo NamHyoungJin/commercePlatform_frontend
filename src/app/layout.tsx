@@ -19,12 +19,19 @@ const sourceSerif = Source_Serif_4({
   display: 'swap',
 });
 
+/** OG·canonical 절대 URL. 프로덕션 빌드에서 `https://www.onlyonemusic.kr` 등으로 맞추려면 `.env`에 설정. */
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.onlyonemusic.kr';
+const defaultTitle = '오직 한가지! www.onlyonemusic.kr';
+const defaultDescription = '온리원뮤직 악보';
+
 export const metadata: Metadata = {
-  title: '오직 한가지! www.onlyonemusic.kr',
-  description: '온리원뮤직 악보',
+  metadataBase: new URL(siteUrl),
+  title: defaultTitle,
+  description: defaultDescription,
   /**
-   * 파비콘은 `public/`에 두어야 `output: 'export'` 정적 배포에서도 `/favicon.ico` 등으로 그대로 제공됨.
-   * (`src/app/icon.png`만 두면 빌드 산출물·배포에 안 실릴 수 있음)
+   * 파비콘 바이너리는 `src/app/favicon.ico`에 둠(App Router 규약).
+   * `public/favicon.ico`만 있으면 빌드 시 Next가 기본 ICO로 덮어써 탭에 Vercel 기본 아이콘이 보일 수 있음.
+   * PNG·애플 터치는 `public/icon.png`, `public/apple-icon.png` 그대로 `/`로 제공.
    */
   icons: {
     icon: [
@@ -32,6 +39,21 @@ export const metadata: Metadata = {
       { url: '/icon.png', type: 'image/png', sizes: '512x512' },
     ],
     apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'ko_KR',
+    siteName: 'OnlyOneMusic',
+    title: defaultTitle,
+    description: defaultDescription,
+    url: siteUrl,
+    images: [{ url: '/icon.png', alt: 'OnlyOneMusic' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: defaultTitle,
+    description: defaultDescription,
+    images: ['/icon.png'],
   },
 };
 

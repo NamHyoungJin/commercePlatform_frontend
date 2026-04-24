@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# 불필요/민감 영역 차단
+Disallow: /admin
+Disallow: /api
+Disallow: /mypage
+Disallow: /auth
+Disallow: /register
+
+# 검색 중복 방지 (선택)
+Disallow: /*?*
+
+# 사이트맵
+Sitemap: https://www.onlyonemusic.kr/sitemap.xml
