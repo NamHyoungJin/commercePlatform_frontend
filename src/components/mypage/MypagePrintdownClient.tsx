@@ -134,13 +134,18 @@ export default function MypagePrintdownClient() {
   const handlePrintClick = async (row: PrintdownRow) => {
     setPrintError(null);
     const titleText = row.music?.kor_name || row.title;
-    setPrintModal({
-      open: true,
-      title: titleText,
-      phase: 'loading',
-      blobUrl: null,
-      errorMsg: '',
-    });
+    const openPdfNewTabOnly =
+      typeof window !== 'undefined' && window.matchMedia?.('(max-width: 767px)')?.matches === true;
+
+    if (!openPdfNewTabOnly) {
+      setPrintModal({
+        open: true,
+        title: titleText,
+        phase: 'loading',
+        blobUrl: null,
+        errorMsg: '',
+      });
+    }
     setOpeningPrintId(row.mypage_print_sid);
     try {
       const { data } = await printdownApi.pdfUrl(row.mypage_print_sid);
@@ -155,6 +160,19 @@ export default function MypagePrintdownClient() {
       const blob = await res.blob();
       const pdfBlob = blob.type && blob.type.includes('pdf') ? blob : new Blob([blob], { type: 'application/pdf' });
       const blobUrl = URL.createObjectURL(pdfBlob);
+
+      if (openPdfNewTabOnly) {
+        revokeBlob();
+        const tab = window.open(`${blobUrl}${PDF_IFRAME_VIEW_HASH_NARROW}`, '_blank', 'noopener,noreferrer');
+        if (!tab) {
+          URL.revokeObjectURL(blobUrl);
+          setPrintError('새 탭에서 PDF를 열지 못했습니다. 브라우저에서 팝업·새 창을 허용했는지 확인해 주세요.');
+          return;
+        }
+        window.setTimeout(() => URL.revokeObjectURL(blobUrl), 180_000);
+        return;
+      }
+
       revokeBlob();
       blobUrlRef.current = blobUrl;
       setPrintModal({
@@ -172,13 +190,17 @@ export default function MypagePrintdownClient() {
       } else if (e instanceof Error && e.message) {
         errorMsg = e.message;
       }
-      setPrintModal({
-        open: true,
-        title: titleText,
-        phase: 'error',
-        blobUrl: null,
-        errorMsg,
-      });
+      if (openPdfNewTabOnly) {
+        setPrintError(errorMsg);
+      } else {
+        setPrintModal({
+          open: true,
+          title: titleText,
+          phase: 'error',
+          blobUrl: null,
+          errorMsg,
+        });
+      }
     } finally {
       setOpeningPrintId(null);
     }
