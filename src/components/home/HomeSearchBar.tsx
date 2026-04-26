@@ -8,7 +8,7 @@ import HeroSearchPill from '@/components/layout/HeroSearchPill';
 const HERO_VIDEO_PLAYBACK_RATE = 0.33;
 
 /** 히어로 배경: 순서대로 재생, 마지막 끝나면 처음으로 반복 (muted로 전 구간 무음) */
-const HERO_VIDEO_SOURCES = ['/moring.mp4', '/nature.mp4', '/worship.mp4'] as const;
+const HERO_VIDEO_SOURCES = ['/mainHeroVideo.mp4'] as const;
 
 /**
  * 히어로 배경 영상 위 세로 오버레이 (위 → 아래 linear-gradient)
