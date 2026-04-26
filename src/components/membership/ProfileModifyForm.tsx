@@ -7,6 +7,24 @@ import { useAuthStore } from '@/store/authStore';
 import axios from 'axios';
 import { formatApiErrorMessage } from '@/lib/onlyonemusicApi';
 
+/** 백엔드 `validate_phone_kr`와 동일한 느낌으로 비교용 숫자열 통일 (+82 → 0…) */
+function normalizeKrMobileDigits(input: string): string {
+  const d = (input || '').replace(/\D/g, '');
+  if (!d) return '';
+  if (d.startsWith('82')) {
+    const rest = d.slice(2);
+    if (!rest) return d;
+    if (rest.startsWith('0')) return rest;
+    return `0${rest}`;
+  }
+  return d;
+}
+
+function phoneMatchesLoadedSnapshot(formPhone: string, snapshotPhone: string): boolean {
+  if (!snapshotPhone) return false;
+  return normalizeKrMobileDigits(formPhone) === normalizeKrMobileDigits(snapshotPhone);
+}
+
 export default function ProfileModifyForm() {
   const setMember = useAuthStore((s) => s.setMember);
   const storeMemberId = useAuthStore((s) => s.member?.member_id ?? '');
@@ -50,6 +68,9 @@ export default function ProfileModifyForm() {
   const [phoneVerifyErr, setPhoneVerifyErr] = useState(false);
   const [emailVerifyMsg, setEmailVerifyMsg] = useState<string | null>(null);
   const [emailVerifyErr, setEmailVerifyErr] = useState(false);
+  /** 발송 성공 시점 API 경로(me vs 가입용 캐시). 확인 시 재계산하지 않아 캐시 키 불일치를 막음 */
+  const [phoneVerifyMode, setPhoneVerifyMode] = useState<'me' | 'register' | null>(null);
+  const [emailVerifyMode, setEmailVerifyMode] = useState<'me' | 'register' | null>(null);
 
   useEffect(() => {
     if (!editUnlocked) return;
@@ -69,6 +90,8 @@ export default function ProfileModifyForm() {
         setIdVerifiedEmail(Boolean(data.id_verified_email));
         setPhoneProofToken(null);
         setEmailProofToken(null);
+        setPhoneVerifyMode(null);
+        setEmailVerifyMode(null);
         setPhoneAuthCode('');
         setEmailAuthCode('');
         setPhoneVerifyMsg(null);
@@ -107,12 +130,14 @@ export default function ProfileModifyForm() {
     setForm((prev) => ({ ...prev, [name]: value }));
     if (name === 'phone') {
       setPhoneProofToken(null);
+      setPhoneVerifyMode(null);
       setPhoneAuthCode('');
       setPhoneVerifyMsg(null);
       setPhoneVerifyErr(false);
     }
     if (name === 'email') {
       setEmailProofToken(null);
+      setEmailVerifyMode(null);
       setEmailAuthCode('');
       setEmailVerifyMsg(null);
       setEmailVerifyErr(false);
@@ -127,28 +152,29 @@ export default function ProfileModifyForm() {
     return formatApiErrorMessage(raw);
   };
 
-  const phoneMatchesLoaded =
-    loadedSnapshotRef.current.phone.length > 0 && form.phone.trim() === loadedSnapshotRef.current.phone;
-  const emailMatchesLoaded =
-    loadedSnapshotRef.current.email.length > 0 &&
-    form.email.trim().toLowerCase() === loadedSnapshotRef.current.email;
-
   const handleSendPhoneVerify = async () => {
     setPhoneVerifyMsg(null);
     setPhoneVerifyErr(false);
+    setPhoneProofToken(null);
+    setPhoneVerifyMode(null);
+    setPhoneAuthCode('');
     const t = form.phone.trim();
     if (!t) {
       setPhoneVerifyErr(true);
       setPhoneVerifyMsg('휴대폰 번호를 입력해 주세요.');
       return;
     }
+    const snapshotPhone = loadedSnapshotRef.current.phone;
+    const useMePath =
+      snapshotPhone.length > 0 && phoneMatchesLoadedSnapshot(t, snapshotPhone);
     setPhoneSendLoading(true);
     try {
-      if (phoneMatchesLoaded) {
+      if (useMePath) {
         await authApi.meIdentityVerifySend({ channel: 'phone', target: t });
       } else {
         await authApi.sendRegisterVerification({ channel: 'phone', target: t });
       }
+      setPhoneVerifyMode(useMePath ? 'me' : 'register');
       setPhoneVerifyErr(false);
       setPhoneVerifyMsg('인증번호가 발송되었습니다.');
     } catch (err) {
@@ -168,9 +194,14 @@ export default function ProfileModifyForm() {
       setPhoneVerifyMsg('휴대폰 번호를 입력해 주세요.');
       return;
     }
+    if (phoneVerifyMode === null) {
+      setPhoneVerifyErr(true);
+      setPhoneVerifyMsg('먼저 인증번호 받기를 눌러 주세요.');
+      return;
+    }
     setPhoneConfirmLoading(true);
     try {
-      if (phoneMatchesLoaded) {
+      if (phoneVerifyMode === 'me') {
         const { data } = await authApi.meIdentityVerifyConfirm({
           channel: 'phone',
           target: t,
@@ -199,19 +230,26 @@ export default function ProfileModifyForm() {
   const handleSendEmailVerify = async () => {
     setEmailVerifyMsg(null);
     setEmailVerifyErr(false);
+    setEmailProofToken(null);
+    setEmailVerifyMode(null);
+    setEmailAuthCode('');
     const t = form.email.trim();
     if (!t) {
       setEmailVerifyErr(true);
       setEmailVerifyMsg('이메일을 입력해 주세요.');
       return;
     }
+    const snapshotEmail = loadedSnapshotRef.current.email;
+    const useMePath =
+      snapshotEmail.length > 0 && t.toLowerCase() === snapshotEmail.toLowerCase();
     setEmailSendLoading(true);
     try {
-      if (emailMatchesLoaded) {
+      if (useMePath) {
         await authApi.meIdentityVerifySend({ channel: 'email', target: t });
       } else {
         await authApi.sendRegisterVerification({ channel: 'email', target: t });
       }
+      setEmailVerifyMode(useMePath ? 'me' : 'register');
       setEmailVerifyErr(false);
       setEmailVerifyMsg('인증번호가 발송되었습니다.');
     } catch (err) {
@@ -231,9 +269,14 @@ export default function ProfileModifyForm() {
       setEmailVerifyMsg('이메일을 입력해 주세요.');
       return;
     }
+    if (emailVerifyMode === null) {
+      setEmailVerifyErr(true);
+      setEmailVerifyMsg('먼저 인증번호 받기를 눌러 주세요.');
+      return;
+    }
     setEmailConfirmLoading(true);
     try {
-      if (emailMatchesLoaded) {
+      if (emailVerifyMode === 'me') {
         const { data } = await authApi.meIdentityVerifyConfirm({
           channel: 'email',
           target: t,
@@ -314,6 +357,8 @@ export default function ProfileModifyForm() {
       setIdVerifiedEmail(Boolean(data.id_verified_email));
       setPhoneProofToken(null);
       setEmailProofToken(null);
+      setPhoneVerifyMode(null);
+      setEmailVerifyMode(null);
       setPhoneAuthCode('');
       setEmailAuthCode('');
       setPhoneVerifyMsg(null);
@@ -525,7 +570,11 @@ export default function ProfileModifyForm() {
               <button
                 type="button"
                 onClick={() => void handleConfirmPhoneVerify()}
-                disabled={phoneConfirmLoading}
+                disabled={
+                  phoneConfirmLoading ||
+                  Boolean(phoneProofToken) ||
+                  phoneVerifyMode === null
+                }
                 className="rounded-lg bg-[#2ca7e1] px-4 py-2 text-sm font-medium text-white hover:bg-[#2496cc] disabled:opacity-50"
               >
                 {phoneConfirmLoading ? '확인 중…' : '인증 확인'}
@@ -562,7 +611,11 @@ export default function ProfileModifyForm() {
               <button
                 type="button"
                 onClick={() => void handleConfirmEmailVerify()}
-                disabled={emailConfirmLoading}
+                disabled={
+                  emailConfirmLoading ||
+                  Boolean(emailProofToken) ||
+                  emailVerifyMode === null
+                }
                 className="rounded-lg bg-[#2ca7e1] px-4 py-2 text-sm font-medium text-white hover:bg-[#2496cc] disabled:opacity-50"
               >
                 {emailConfirmLoading ? '확인 중…' : '인증 확인'}
