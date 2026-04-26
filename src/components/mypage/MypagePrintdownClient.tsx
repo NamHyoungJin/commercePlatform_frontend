@@ -16,6 +16,7 @@ import { formatApiErrorMessage } from '@/lib/onlyonemusicApi';
 import {
   MypageChevronLeftIcon,
   MypageChevronRightIcon,
+  MypageDocumentIcon,
   MypagePrinterIcon,
   MypageSearchPlusIcon,
   MypageXIcon,
@@ -36,6 +37,8 @@ function formatShortDate(iso: string | null | undefined): string {
 
 /** Chrome 등 내장 PDF 뷰어에서 색인·썸네일 패널·툴바 최소화(브라우저마다 적용 정도 상이) */
 const PDF_IFRAME_VIEW_HASH = '#toolbar=0&navpanes=0&pagemode=none';
+/** 좁은 화면: 페이지 너비에 맞춤(가로 스크롤 완화). Safari 등은 적용이 제한될 수 있음 */
+const PDF_IFRAME_VIEW_HASH_NARROW = '#toolbar=0&navpanes=0&pagemode=none&page=1&view=FitH';
 
 type PrintPhase = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -67,6 +70,16 @@ export default function MypagePrintdownClient() {
   const [printModal, setPrintModal] = useState<PrintModalState>(closedPrint);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const blobUrlRef = useRef<string | null>(null);
+  const [isNarrowViewport, setIsNarrowViewport] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(max-width: 767px)');
+    const apply = () => setIsNarrowViewport(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
 
   const revokeBlob = useCallback(() => {
     if (blobUrlRef.current) {
@@ -182,6 +195,21 @@ export default function MypagePrintdownClient() {
     }
   }, []);
 
+  const openPdfInNewTab = useCallback(() => {
+    const url = printModal.blobUrl;
+    if (!url) return;
+    const narrow =
+      typeof window !== 'undefined' && window.matchMedia?.('(max-width: 767px)')?.matches;
+    const hash = narrow ? PDF_IFRAME_VIEW_HASH_NARROW : PDF_IFRAME_VIEW_HASH;
+    try {
+      window.open(`${url}${hash}`, '_blank', 'noopener,noreferrer');
+    } catch {
+      setPrintError('새 탭에서 PDF를 열지 못했습니다. 브라우저에서 팝업을 허용했는지 확인해 주세요.');
+    }
+  }, [printModal.blobUrl]);
+
+  const pdfIframeHash = isNarrowViewport ? PDF_IFRAME_VIEW_HASH_NARROW : PDF_IFRAME_VIEW_HASH;
+
   if (loading && rows.length === 0 && !error) {
     return <p className="text-base text-text-muted">목록을 불러오는 중…</p>;
   }
@@ -192,7 +220,7 @@ export default function MypagePrintdownClient() {
           <div className="fixed inset-0 z-[250] flex items-center justify-center p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="print-modal-title">
             <button type="button" className="absolute inset-0 bg-black/50" aria-label="닫기" onClick={closePrintModal} />
             <div
-              className="relative z-10 flex max-h-[min(92vh,900px)] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-neutral-200 bg-[#fff] shadow-2xl ring-1 ring-black/5"
+              className="relative z-10 flex min-h-0 min-w-0 max-h-[min(92vh,900px)] w-full max-w-[min(100%,56rem)] flex-col overflow-hidden rounded-xl border border-neutral-200 bg-[#fff] shadow-2xl ring-1 ring-black/5"
               onClick={(e) => e.stopPropagation()}
             >
               <header
@@ -202,7 +230,7 @@ export default function MypagePrintdownClient() {
                   id="print-modal-title"
                   className={`min-w-0 text-xl tracking-tight sm:text-2xl ${modalTitleHeadingClass}`}
                 >
-                  악보 인쇄
+                  {isNarrowViewport ? '악보 PDF' : '악보 인쇄'}
                 </h2>
                 <button type="button" onClick={closePrintModal} className={modalCloseButtonOnBarClass} aria-label="닫기">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -213,11 +241,20 @@ export default function MypagePrintdownClient() {
               <p
                 className={`home-album-strip-sub popular-chart-section-sub shrink-0 border-b border-neutral-200 px-4 py-2.5 sm:px-5 ${MODAL_CONTENT_BG}`}
               >
-                아래에서 미리 확인한 뒤, <strong className="font-semibold text-teal-700">프린터로 인쇄</strong>를 누르면 인쇄
-                대화상자가 열립니다.
+                {isNarrowViewport ? (
+                  <>
+                    아래에서 PDF를 확인하세요. <strong className="font-semibold text-teal-700">새 탭에서 열기</strong>로 전체
+                    화면에서 볼 수 있습니다.
+                  </>
+                ) : (
+                  <>
+                    아래에서 미리 확인한 뒤, <strong className="font-semibold text-teal-700">프린터로 인쇄</strong>를 누르면 인쇄
+                    대화상자가 열립니다.
+                  </>
+                )}
               </p>
 
-              <div className={`min-h-0 flex-1 overflow-hidden ${MODAL_CONTENT_BG}`}>
+              <div className={`min-h-0 min-w-0 flex-1 overflow-hidden ${MODAL_CONTENT_BG}`}>
                 {printModal.phase === 'loading' ? (
                   <div className="flex min-h-[50vh] items-center justify-center text-base text-text-muted">PDF를 불러오는 중…</div>
                 ) : null}
@@ -227,27 +264,52 @@ export default function MypagePrintdownClient() {
                   </div>
                 ) : null}
                 {printModal.phase === 'ready' && printModal.blobUrl ? (
-                  <iframe
-                    ref={iframeRef}
-                    title="악보 PDF"
-                    src={`${printModal.blobUrl}${PDF_IFRAME_VIEW_HASH}`}
-                    className="h-[min(72vh,720px)] w-full border-0 bg-white"
-                  />
+                  <div className="h-[min(78vh,820px)] w-full min-w-0 max-w-full overflow-hidden md:h-[min(72vh,720px)]">
+                    <iframe
+                      ref={iframeRef}
+                      title="악보 PDF"
+                      src={`${printModal.blobUrl}${pdfIframeHash}`}
+                      className="block h-full w-full min-w-0 max-w-full border-0 bg-white"
+                    />
+                  </div>
                 ) : null}
               </div>
 
               <footer
                 className={`flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-neutral-200 px-4 py-3 sm:px-5 ${MODAL_CONTENT_BG}`}
               >
-                {printModal.phase === 'ready' ? (
-                  <button
-                    type="button"
-                    onClick={runPrintDialog}
-                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-lg bg-[#2ca7e1] px-4 py-2.5 text-base font-semibold text-white shadow-sm hover:bg-[#2496cc]"
-                  >
-                    <MypagePrinterIcon className="h-5 w-5 shrink-0 text-white/95" />
-                    프린터로 인쇄
-                  </button>
+                {printModal.phase === 'ready' && printModal.blobUrl ? (
+                  <>
+                    {isNarrowViewport ? (
+                      <button
+                        type="button"
+                        onClick={openPdfInNewTab}
+                        className="inline-flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-lg bg-[#2ca7e1] px-4 py-2.5 text-base font-semibold text-white shadow-sm hover:bg-[#2496cc] sm:w-auto"
+                      >
+                        <MypageDocumentIcon className="h-5 w-5 shrink-0 text-white/95" />
+                        새 탭에서 열기
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={runPrintDialog}
+                        className="inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-lg bg-[#2ca7e1] px-4 py-2.5 text-base font-semibold text-white shadow-sm hover:bg-[#2496cc]"
+                      >
+                        <MypagePrinterIcon className="h-5 w-5 shrink-0 text-white/95" />
+                        프린터로 인쇄
+                      </button>
+                    )}
+                    {isNarrowViewport ? (
+                      <button
+                        type="button"
+                        onClick={runPrintDialog}
+                        className="inline-flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 px-4 py-2.5 text-base font-medium text-neutral-800 hover:bg-neutral-50 sm:w-auto"
+                      >
+                        <MypagePrinterIcon className="h-5 w-5 shrink-0 text-neutral-600" />
+                        인쇄
+                      </button>
+                    ) : null}
+                  </>
                 ) : null}
                 <button
                   type="button"
@@ -300,10 +362,11 @@ export default function MypagePrintdownClient() {
               구매·인쇄 가능
             </div>
             <div className="text-center md:col-start-4 md:row-start-1" role="columnheader">
-              보기
+              샘플
             </div>
             <div className="text-center md:col-start-5 md:row-start-1" role="columnheader">
-              인쇄
+              <span className="md:hidden">보기</span>
+              <span className="hidden md:inline">인쇄</span>
             </div>
           </div>
         </div>
@@ -373,24 +436,24 @@ export default function MypagePrintdownClient() {
                           </SampleScoreModalTrigger>
                           <button
                             type="button"
-                            aria-label="인쇄"
+                            aria-label="PDF 보기"
                             disabled={!canPrint || openingPrintId === row.mypage_print_sid}
                             title={
                               canPrint
-                                ? '인쇄 준비 창을 엽니다.'
+                                ? 'PDF를 확인합니다.'
                                 : atLimit
                                   ? '인쇄·다운로드 허용 횟수를 모두 사용했습니다.'
                                   : '현재 인쇄·다운로드가 제한된 상태입니다.'
                             }
                             onClick={() => void handlePrintClick(row)}
-                            className="inline-flex min-h-[2.75rem] min-w-[2.75rem] items-center justify-center gap-0 rounded-md border border-[var(--border-strong)] bg-[#2ca7e1] px-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2496cc] disabled:cursor-not-allowed disabled:opacity-45 sm:text-[15px]"
+                            className="inline-flex min-h-[2.75rem] min-w-[4.5rem] items-center justify-center gap-1 rounded-md border border-[var(--border-strong)] bg-[#2ca7e1] px-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2496cc] disabled:cursor-not-allowed disabled:opacity-45 sm:text-[15px]"
                           >
                             {openingPrintId === row.mypage_print_sid ? (
                               '…'
                             ) : (
                               <>
-                                <MypagePrinterIcon className="h-5 w-5 shrink-0 text-white/95" />
-                                <span className="sr-only">인쇄</span>
+                                <MypageDocumentIcon className="h-5 w-5 shrink-0 text-white/95" />
+                                <span>보기</span>
                               </>
                             )}
                           </button>
