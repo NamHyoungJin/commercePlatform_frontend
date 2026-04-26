@@ -128,10 +128,10 @@ export default function Header() {
               <HamburgerIcon open={mobileMenuOpen} />
             </button>
 
-            <div className="flex flex-1 justify-center px-12 sm:px-14 lg:flex-none lg:justify-start lg:px-0">
+            <div className="flex min-w-0 flex-1 justify-start pr-12 sm:pr-14 lg:flex-none lg:justify-start lg:pr-0">
               <Link
                 href="/"
-                className="group shrink-0 rounded-lg bg-transparent px-2.5 py-1.5 transition hover:opacity-90"
+                className="group shrink-0 rounded-lg bg-transparent py-1.5 pl-0 pr-2.5 transition hover:opacity-90 lg:px-2.5"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Image
@@ -139,7 +139,7 @@ export default function Header() {
                   alt="ONLY ONE MUSIC score"
                   width={280}
                   height={71}
-                  className="h-11 w-auto max-w-[200px] object-contain object-center contrast-[1.06] saturate-[1.12] sm:h-12 sm:max-w-[248px] md:h-[3.25rem] md:max-w-[300px] lg:object-left"
+                  className="h-11 w-auto max-w-[200px] object-contain object-left contrast-[1.06] saturate-[1.12] sm:h-12 sm:max-w-[248px] md:h-[3.25rem] md:max-w-[300px]"
                   priority
                   unoptimized
                 />

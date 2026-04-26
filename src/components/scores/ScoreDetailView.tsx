@@ -14,6 +14,10 @@ import { lyricsToPlainText, ScoreLyricModalTrigger } from '@/components/modals/S
 const btnOutline =
   'inline-flex min-h-[2.5rem] items-center justify-center rounded-md border border-[var(--border-strong)] bg-surface px-4 py-2 text-sm font-medium text-text-primary shadow-sm transition-colors hover:border-accent-teal/40 hover:bg-surface-muted';
 
+/** 모바일 상세: 액션 버튼 정사각형·아이콘만 */
+const btnIconOnlyMobile =
+  'max-md:h-11 max-md:w-11 max-md:min-h-0 max-md:shrink-0 max-md:justify-center max-md:gap-0 max-md:px-0 max-md:py-0 max-md:[&>svg]:m-0';
+
 const metaIcon = 'h-4 w-4 shrink-0 text-text-muted';
 
 /** 히어로용: «Verse 1»·«Chorus»·«1절» 같은 줄은 제외하고 실제 가사 첫 줄 */
@@ -286,12 +290,13 @@ export default function ScoreDetailView({ scoreSid }: { scoreSid: string }) {
             </aside>
 
             <div className="row-start-1 min-w-0 space-y-8 lg:col-span-5 lg:col-start-2">
-              <div className="grid gap-6 md:grid-cols-2 md:items-start md:gap-8">
-                <div className="min-w-0">
-                  <h1 className="flex items-start gap-3 text-2xl font-bold tracking-tight text-text-primary md:items-center md:text-3xl">
+              {/* 모바일: 제목·부제 → 구분선 → 아이콘 메타 → 한 줄 요약 → (좌: 아이콘 버튼+장바구니 / 우: 가격) */}
+              <div className="space-y-4 pb-2 md:hidden">
+                <div className="min-w-0 border-b border-[var(--border-subtle)] pb-4">
+                  <h1 className="flex items-start gap-3 text-2xl font-bold tracking-tight text-text-primary">
                     <svg
                       aria-hidden
-                      className="mt-1 h-8 w-8 shrink-0 text-accent-teal md:mt-0 md:h-9 md:w-9"
+                      className="mt-1 h-8 w-8 shrink-0 text-accent-teal"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -305,41 +310,11 @@ export default function ScoreDetailView({ scoreSid }: { scoreSid: string }) {
                     <span className="min-w-0">{score.title}</span>
                   </h1>
                   {heroLyricFirstLine || score.title_sub ? (
-                    <p className="mt-2 text-sm text-text-muted">
-                      {heroLyricFirstLine || score.title_sub}
-                    </p>
+                    <p className="mt-2 text-sm text-text-muted">{heroLyricFirstLine || score.title_sub}</p>
                   ) : null}
                 </div>
-                <div className="min-w-0 space-y-2 border-t border-[var(--border-subtle)] pt-4 text-sm text-text-muted md:border-t-0 md:border-l md:border-l-[var(--border-subtle)] md:pl-8 md:pt-0">
-                  <p className="md:text-right">
-                    <span className="text-text-muted">형식</span>{' '}
-                    <span className="font-medium text-text-primary">{score.score_type_name || '—'}</span>
-                    <span className="text-text-muted"> · </span>
-                    <span className="text-text-muted">페이지</span>{' '}
-                    <span className="font-medium text-text-primary tabular-nums">{score.pages}p</span>
-                    <span className="text-text-muted"> · </span>
-                    <span className="text-text-muted">언어</span>{' '}
-                    <span className="font-medium text-text-primary">{score.language_name || '—'}</span>
-                    <span className="text-text-muted"> · </span>
-                    <span className="text-text-muted">조회</span>{' '}
-                    <span className="inline-flex items-center gap-1 font-medium text-text-primary">
-                      <span className="tabular-nums">{score.hit.toLocaleString()}</span>
-                    </span>
-                  </p>
-                  <p className="md:text-right">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">가격</span>
-                    <span className="mt-1 block text-3xl font-extrabold tabular-nums tracking-tight text-accent-amber md:mt-0 md:inline md:pl-2 md:text-4xl">
-                      {score.price.toLocaleString()}
-                      <span className="text-xl font-bold text-accent-amber-soft md:text-2xl">원</span>
-                    </span>
-                  </p>
-                </div>
-              </div>
 
-              <hr className="border-[var(--border-subtle)]" />
-
-              <div className="flex flex-col gap-5 pb-6 md:flex-row md:items-start md:justify-between md:gap-6 md:pb-8">
-                <div className="min-w-0 flex-1 space-y-3 text-sm text-text-secondary md:text-[15px]">
+                <div className="space-y-3 text-sm text-text-secondary">
                   <p className="flex flex-wrap items-baseline gap-x-2 gap-y-2">
                     <span className="inline-flex items-center gap-1.5">
                       <svg
@@ -409,12 +384,10 @@ export default function ScoreDetailView({ scoreSid }: { scoreSid: string }) {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       >
-                        {/* 샵(#) — 반음 올림 느낌 */}
                         <line x1="2.5" y1="7" x2="10" y2="7" />
                         <line x1="2.5" y1="11" x2="10" y2="11" />
                         <line x1="5" y1="4" x2="4" y2="14" />
                         <line x1="8.5" y1="4" x2="7.5" y2="14" />
-                        {/* ♭ — 반음 내림 느낌 (세로선 + 오른쪽 볼) */}
                         <line x1="14" y1="4" x2="14" y2="20" />
                         <path d="M14 11.5c3.2-1.2 5.5 0.2 5.5 3.2s-2.3 4.8-5.5 3.8" />
                       </svg>
@@ -424,8 +397,24 @@ export default function ScoreDetailView({ scoreSid }: { scoreSid: string }) {
                   </p>
                 </div>
 
-                <div className="flex min-w-0 flex-col items-stretch gap-3 md:shrink-0 md:items-end">
-                  <div className="flex flex-wrap gap-2 md:justify-end">
+                <hr className="border-[var(--border-subtle)]" aria-hidden />
+
+                <p className="text-sm text-text-muted">
+                  <span className="text-text-muted">형식</span>{' '}
+                  <span className="font-medium text-text-primary">{score.score_type_name || '—'}</span>
+                  <span className="text-text-muted"> · </span>
+                  <span className="text-text-muted">페이지</span>{' '}
+                  <span className="font-medium text-text-primary tabular-nums">{score.pages}p</span>
+                  <span className="text-text-muted"> · </span>
+                  <span className="text-text-muted">언어</span>{' '}
+                  <span className="font-medium text-text-primary">{score.language_name || '—'}</span>
+                  <span className="text-text-muted"> · </span>
+                  <span className="text-text-muted">조회</span>{' '}
+                  <span className="font-medium text-text-primary tabular-nums">{score.hit.toLocaleString()}</span>
+                </p>
+
+                <div className="flex min-w-0 flex-nowrap items-center gap-2 pt-1">
+                  <div className="flex min-w-0 flex-1 items-center gap-2">
                     <ScoreLyricModalTrigger
                       scoreSid={score.score_sid}
                       preview={{
@@ -434,7 +423,8 @@ export default function ScoreDetailView({ scoreSid }: { scoreSid: string }) {
                         musicWrite: score.music.music_write,
                         musicCompose: score.music.music_compose,
                       }}
-                      className={`${btnOutline} gap-2`}
+                      className={`${btnOutline} shrink-0 gap-2 ${btnIconOnlyMobile}`}
+                      ariaLabel="가사 보기"
                     >
                       <svg
                         aria-hidden
@@ -452,10 +442,199 @@ export default function ScoreDetailView({ scoreSid }: { scoreSid: string }) {
                         <line x1="16" x2="8" y1="17" y2="17" />
                         <line x1="10" x2="8" y1="9" y2="9" />
                       </svg>
-                      가사보기
                     </ScoreLyricModalTrigger>
-                    <AddToWishButton scoreSid={score.score_sid} />
-                    <AddToCartButton scoreSid={score.score_sid} variant="detail" label="장바구니 넣기" />
+                    <AddToWishButton scoreSid={score.score_sid} label="" className={`shrink-0 ${btnIconOnlyMobile}`} />
+                    <div className="min-w-0 flex-1 [&_button]:w-full">
+                      <AddToCartButton
+                        scoreSid={score.score_sid}
+                        variant="detail"
+                        label="장바구니 담기"
+                        className="w-full justify-center gap-1.5 max-md:min-h-11 max-md:px-3"
+                      />
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-right leading-none">
+                    <span className="sr-only">가격</span>
+                    <p className="text-[1.75rem] font-extrabold tabular-nums tracking-tight text-accent-amber sm:text-[2rem]">
+                      {score.price.toLocaleString()}
+                      <span className="text-xl font-bold text-accent-amber-soft sm:text-2xl">원</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="hidden space-y-8 md:block">
+                <div className="grid gap-6 md:grid-cols-2 md:items-start md:gap-8">
+                  <div className="min-w-0">
+                    <h1 className="flex items-start gap-3 text-2xl font-bold tracking-tight text-text-primary md:items-center md:text-3xl">
+                      <svg
+                        aria-hidden
+                        className="mt-1 h-8 w-8 shrink-0 text-accent-teal md:mt-0 md:h-9 md:w-9"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                      </svg>
+                      <span className="min-w-0">{score.title}</span>
+                    </h1>
+                    {heroLyricFirstLine || score.title_sub ? (
+                      <p className="mt-2 text-sm text-text-muted">
+                        {heroLyricFirstLine || score.title_sub}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="min-w-0 space-y-2 border-t border-[var(--border-subtle)] pt-4 text-sm text-text-muted md:border-t-0 md:border-l md:border-l-[var(--border-subtle)] md:pl-8 md:pt-0">
+                    <p className="md:text-right">
+                      <span className="text-text-muted">형식</span>{' '}
+                      <span className="font-medium text-text-primary">{score.score_type_name || '—'}</span>
+                      <span className="text-text-muted"> · </span>
+                      <span className="text-text-muted">페이지</span>{' '}
+                      <span className="font-medium text-text-primary tabular-nums">{score.pages}p</span>
+                      <span className="text-text-muted"> · </span>
+                      <span className="text-text-muted">언어</span>{' '}
+                      <span className="font-medium text-text-primary">{score.language_name || '—'}</span>
+                      <span className="text-text-muted"> · </span>
+                      <span className="text-text-muted">조회</span>{' '}
+                      <span className="inline-flex items-center gap-1 font-medium text-text-primary">
+                        <span className="tabular-nums">{score.hit.toLocaleString()}</span>
+                      </span>
+                    </p>
+                    <p className="md:text-right">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">가격</span>
+                      <span className="mt-1 block text-3xl font-extrabold tabular-nums tracking-tight text-accent-amber md:mt-0 md:inline md:pl-2 md:text-4xl">
+                        {score.price.toLocaleString()}
+                        <span className="text-xl font-bold text-accent-amber-soft md:text-2xl">원</span>
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <hr className="border-[var(--border-subtle)]" />
+
+                <div className="flex flex-col gap-5 pb-6 md:flex-row md:items-start md:justify-between md:gap-6 md:pb-8">
+                  <div className="min-w-0 flex-1 space-y-3 text-sm text-text-secondary md:text-[15px]">
+                    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-2">
+                      <span className="inline-flex items-center gap-1.5">
+                        <svg
+                          aria-hidden
+                          className={metaIcon}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M12 20h9" />
+                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                        </svg>
+                        <span className="text-text-muted">작사 :</span>
+                        <span className="text-text-primary">{score.music.music_write || '—'}</span>
+                      </span>
+                      <span className="text-text-muted">,</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <svg
+                          aria-hidden
+                          className={metaIcon}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M9 18V5l12-2v13" />
+                          <circle cx="6" cy="18" r="3" />
+                          <circle cx="18" cy="16" r="3" />
+                        </svg>
+                        <span className="text-text-muted">작곡 :</span>
+                        <span className="text-text-primary">{score.music.music_compose || '—'}</span>
+                      </span>
+                    </p>
+                    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-2">
+                      <span className="inline-flex items-center gap-1.5">
+                        <svg
+                          aria-hidden
+                          className={metaIcon}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="2" x2="22" y1="12" y2="12" />
+                          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                        </svg>
+                        <span className="text-text-muted">언어 :</span>
+                        <span className="text-text-primary">{score.language_name || '—'}</span>
+                      </span>
+                      <span className="text-text-muted">,</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <svg
+                          aria-hidden
+                          className={metaIcon}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          {/* 샵(#) — 반음 올림 느낌 */}
+                          <line x1="2.5" y1="7" x2="10" y2="7" />
+                          <line x1="2.5" y1="11" x2="10" y2="11" />
+                          <line x1="5" y1="4" x2="4" y2="14" />
+                          <line x1="8.5" y1="4" x2="7.5" y2="14" />
+                          {/* ♭ — 반음 내림 느낌 (세로선 + 오른쪽 볼) */}
+                          <line x1="14" y1="4" x2="14" y2="20" />
+                          <path d="M14 11.5c3.2-1.2 5.5 0.2 5.5 3.2s-2.3 4.8-5.5 3.8" />
+                        </svg>
+                        <span className="text-text-muted">조표 :</span>
+                        <span className="text-text-primary">{chordLine}</span>
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="flex min-w-0 flex-col items-stretch gap-3 md:shrink-0 md:items-end">
+                    <div className="flex flex-wrap gap-2 md:justify-end">
+                      <ScoreLyricModalTrigger
+                        scoreSid={score.score_sid}
+                        preview={{
+                          title: score.title,
+                          korName: score.music.kor_name,
+                          musicWrite: score.music.music_write,
+                          musicCompose: score.music.music_compose,
+                        }}
+                        className={`${btnOutline} gap-2`}
+                      >
+                        <svg
+                          aria-hidden
+                          className="h-5 w-5 shrink-0"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                          <line x1="16" x2="8" y1="13" y2="13" />
+                          <line x1="16" x2="8" y1="17" y2="17" />
+                          <line x1="10" x2="8" y1="9" y2="9" />
+                        </svg>
+                        가사보기
+                      </ScoreLyricModalTrigger>
+                      <AddToWishButton scoreSid={score.score_sid} />
+                      <AddToCartButton scoreSid={score.score_sid} variant="detail" label="장바구니 넣기" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -464,7 +643,7 @@ export default function ScoreDetailView({ scoreSid }: { scoreSid: string }) {
 
               <div className="w-full">
                 {sampleUrl ? (
-                  <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[#fff] p-[80px] shadow-md">
+                  <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[#fff] p-[10px] shadow-md md:p-[80px]">
                     <img
                       src={sampleUrl}
                       alt={score.title}
