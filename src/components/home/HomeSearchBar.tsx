@@ -7,8 +7,12 @@ import HeroSearchPill from '@/components/layout/HeroSearchPill';
 /** 배경 영상 재생 속도. 1 = 일반, 0.5 = 절반, 0.33 = 더 느리게. (대부분 브라우저에서 지원) */
 const HERO_VIDEO_PLAYBACK_RATE = 0.33;
 
-/** 히어로 배경: 순서대로 재생, 마지막 끝나면 처음으로 반복 (muted로 전 구간 무음) */
-const HERO_VIDEO_SOURCES = ['/mainHeroVideo.mp4'] as const;
+/**
+ * 히어로 배경 영상 URL (`public/` 기준).
+ * 실서버(Linux)는 경로 대소문자 일치해야 함 — 파일명이 `mainheroVideo.mp4`이면 반드시 소문자 h.
+ * 여러 개면 순서 재생 후 `onEnded`로 처음으로, 한 개면 HTML `loop`로 끊김 없이 반복.
+ */
+const HERO_VIDEO_SOURCES = ['/mainheroVideo.mp4'] as const;
 
 /**
  * 히어로 배경 영상 위 세로 오버레이 (위 → 아래 linear-gradient)
@@ -25,6 +29,8 @@ const HERO_VIDEO_OVERLAY_GRADIENT = [
   'rgba(6, 10, 18, 0.86) 72%',  // 하단으로 갈수록 (이전 0.78 → 조금 진하게)
   'rgba(2, 4, 10, 0.97) 100%',  // 맨 아래 (이전 0.92 → 더 진하게)
 ].join(', ');
+
+const HERO_SINGLE_CLIP = HERO_VIDEO_SOURCES.length === 1;
 
 export default function HomeSearchBar() {
   const [heroClipIndex, setHeroClipIndex] = useState(0);
@@ -60,8 +66,13 @@ export default function HomeSearchBar() {
           autoPlay
           muted
           playsInline
+          loop={HERO_SINGLE_CLIP}
           preload="auto"
-          onEnded={() => setHeroClipIndex((i) => (i + 1) % HERO_VIDEO_SOURCES.length)}
+          onEnded={
+            HERO_SINGLE_CLIP
+              ? undefined
+              : () => setHeroClipIndex((i) => (i + 1) % HERO_VIDEO_SOURCES.length)
+          }
         />
       </div>
 
