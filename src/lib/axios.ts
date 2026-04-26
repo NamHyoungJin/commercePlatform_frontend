@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { tokenUtils } from './tokenUtils';
 import { unwrapOnlyonemusicBody } from './onlyonemusicApi';
+import { refreshAccessTokenSingleton } from './refreshAccessTokenSingleton';
 
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -15,17 +16,6 @@ apiClient.interceptors.request.use((config) => {
   }
   return config;
 });
-
-let isRefreshing = false;
-let failedQueue: Array<{ resolve: (v: string) => void; reject: (e: unknown) => void }> = [];
-
-const processQueue = (error: unknown, token: string | null) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) reject(error);
-    else resolve(token!);
-  });
-  failedQueue = [];
-};
 
 apiClient.interceptors.response.use(
   (response) => {
@@ -59,41 +49,21 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (isRefreshing) {
-      return new Promise<string>((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      }).then((token) => {
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        return apiClient(originalRequest);
-      });
+    const reqUrl = `${originalRequest.baseURL || ''}${originalRequest.url || ''}`;
+    if (reqUrl.includes('/auth/token/refresh/')) {
+      tokenUtils.clearTokens();
+      return Promise.reject(error);
     }
 
     originalRequest._retry = true;
-    isRefreshing = true;
 
     try {
-      const base = (apiClient.defaults.baseURL || process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
-      const { data } = await axios.post(
-        `${base}/auth/token/refresh/`,
-        {},
-        { withCredentials: true, headers: { 'Content-Type': 'application/json' } },
-      );
-      const unwrapped = unwrapOnlyonemusicBody<{ access?: string }>(data);
-      const access = unwrapped.access;
-      if (!access) {
-        throw new Error('no access token');
-      }
-      tokenUtils.setAccess(access);
-
+      const access = await refreshAccessTokenSingleton();
       originalRequest.headers.Authorization = `Bearer ${access}`;
-      processQueue(null, access);
       return apiClient(originalRequest);
     } catch (refreshError) {
-      processQueue(refreshError, null);
       tokenUtils.clearTokens();
       return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
     }
   },
 );

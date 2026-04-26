@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from '@/components/AppLink';
 import { authApi } from '@/lib/authApi';
 import { useAuthStore } from '@/store/authStore';
@@ -25,7 +26,10 @@ function phoneMatchesLoadedSnapshot(formPhone: string, snapshotPhone: string): b
   return normalizeKrMobileDigits(formPhone) === normalizeKrMobileDigits(snapshotPhone);
 }
 
+type SaveFeedbackModal = { variant: 'success' | 'error'; message: string };
+
 export default function ProfileModifyForm() {
+  const router = useRouter();
   const setMember = useAuthStore((s) => s.setMember);
   const storeMemberId = useAuthStore((s) => s.member?.member_id ?? '');
 
@@ -50,7 +54,7 @@ export default function ProfileModifyForm() {
   });
   const [memberId, setMemberId] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [saveResultModal, setSaveResultModal] = useState<SaveFeedbackModal | null>(null);
 
   const loadedSnapshotRef = useRef({ phone: '', email: '' });
   const [idVerifiedPhone, setIdVerifiedPhone] = useState(false);
@@ -124,7 +128,7 @@ export default function ProfileModifyForm() {
     if (type === 'checkbox') {
       setForm((prev) => ({ ...prev, [name]: checked }));
       setError(null);
-      setSuccess(null);
+      setSaveResultModal(null);
       return;
     }
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -143,7 +147,7 @@ export default function ProfileModifyForm() {
       setEmailVerifyErr(false);
     }
     setError(null);
-    setSuccess(null);
+    setSaveResultModal(null);
   };
 
   const errMsg = (err: unknown): string => {
@@ -332,7 +336,7 @@ export default function ProfileModifyForm() {
       return;
     }
     setError(null);
-    setSuccess(null);
+    setSaveResultModal(null);
     setSaving(true);
     try {
       const { data } = await authApi.patchMe({
@@ -372,10 +376,16 @@ export default function ProfileModifyForm() {
         new_password: '',
         new_password_confirm: '',
       }));
-      setSuccess('회원정보가 저장되었습니다.');
+      setSaveResultModal({
+        variant: 'success',
+        message: '회원정보가 저장되었습니다. 확인을 누르면 마이페이지로 이동합니다.',
+      });
     } catch (err) {
       const raw = axios.isAxiosError(err) ? err.response?.data : undefined;
-      setError(raw ? formatApiErrorMessage(raw) : '저장에 실패했습니다.');
+      setSaveResultModal({
+        variant: 'error',
+        message: raw ? formatApiErrorMessage(raw) : '저장에 실패했습니다.',
+      });
     } finally {
       setSaving(false);
     }
@@ -452,9 +462,6 @@ export default function ProfileModifyForm() {
         <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-base text-red-800" role="alert">
           {error}
         </p>
-      )}
-      {success && (
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-base text-emerald-900">{success}</p>
       )}
 
       <div className="flex flex-col gap-1.5">
@@ -674,6 +681,45 @@ export default function ProfileModifyForm() {
           회원탈퇴
         </Link>
       </div>
+
+      {saveResultModal ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="save-result-modal-title"
+            aria-describedby="save-result-modal-desc"
+            className="max-h-[min(85vh,32rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-[var(--border-strong)] bg-surface p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3
+              id="save-result-modal-title"
+              className={`text-lg font-bold ${saveResultModal.variant === 'success' ? 'text-emerald-800' : 'text-red-800'}`}
+            >
+              {saveResultModal.variant === 'success' ? '저장 완료' : '저장 실패'}
+            </h3>
+            <p id="save-result-modal-desc" className="mt-3 whitespace-pre-wrap text-base text-text-primary">
+              {saveResultModal.message}
+            </p>
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                className="rounded-full bg-[#2ca7e1] px-6 py-2.5 text-base font-semibold text-white hover:bg-[#2496cc]"
+                onClick={() => {
+                  if (saveResultModal.variant === 'success') {
+                    setSaveResultModal(null);
+                    router.push('/mypage');
+                  } else {
+                    setSaveResultModal(null);
+                  }
+                }}
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </form>
   );
 }

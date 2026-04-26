@@ -168,7 +168,10 @@ export default function Header() {
                     ) : null}
                   </Link>
                   {item.children && openDropdown === item.label && (
-                    <ul className="absolute left-0 top-full z-50 mt-0.5 min-w-[200px] rounded-lg border border-[var(--border-subtle)] bg-surface py-1 shadow-lg shadow-neutral-900/10 ring-1 ring-black/[0.04]">
+                    <ul
+                      className="absolute left-0 top-full z-50 min-w-[200px] rounded-lg border border-[var(--border-subtle)] bg-surface py-1 shadow-lg shadow-neutral-900/10 ring-1 ring-black/[0.04] before:pointer-events-auto before:absolute before:inset-x-0 before:-top-2 before:h-2 before:content-['']"
+                      onMouseEnter={() => setOpenDropdown(item.label)}
+                    >
                       {item.children.map((child) => (
                         <li key={child.label}>
                           <Link
@@ -210,7 +213,10 @@ export default function Header() {
                   </span>
                 </Link>
                 {openMypageMenu && (
-                  <ul className="absolute right-0 top-full z-50 mt-0.5 min-w-[200px] rounded-lg border border-[var(--border-subtle)] bg-surface py-1 shadow-lg shadow-neutral-900/10 ring-1 ring-black/[0.04]">
+                  <ul
+                    className="absolute right-0 top-full z-50 min-w-[200px] rounded-lg border border-[var(--border-subtle)] bg-surface py-1 shadow-lg shadow-neutral-900/10 ring-1 ring-black/[0.04] before:pointer-events-auto before:absolute before:inset-x-0 before:-top-2 before:h-2 before:content-['']"
+                    onMouseEnter={() => setOpenMypageMenu(true)}
+                  >
                     <li>
                       <Link
                         href="/mypage"
